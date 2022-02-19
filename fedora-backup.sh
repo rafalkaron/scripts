@@ -4,18 +4,23 @@
 # * Add a check that ensures that there's an older subvolume for progressive backup
 # * Add if that checks how many snapshots there are. If there are less than 3 snapshots, do not delete the oldest one
 
-# Create a snapshot
-sudo btrfs subvolume snapshot -r / /.snapshots/full-$(date +%Y%m%d)
+# DIRS
+local_snapshots_dir="/.snapshots"
+remote_snapshots_dir="/run/media/rk/256/snapshots"
 
-# Get the most recent snapshot filename
-most_recent_backup=$(ls /.snapshots | tail -1)
-oldest_backup=$(ls /.snapshots -r | tail -1)
+# FILENAMES
+new_backup="full-$(date +%Y%m%d)"
+previous_backup=$(ls $local_snapshots_dir | tail -1)
+oldest_backup=$(ls $local_snapshots_dir -r | tail -1)
+
+# Create a snapshot
+sudo btrfs subvolume snapshot -r / $local_snapshots_dir/$new_backup
 
 # Send the new snapshot progressively
-sudo btrfs send -p /.snapshots/$most_recent_backup /.snapshots/full-$(date +%Y%m%d) | sudo btrfs receive /run/media/rk/256/snapshots
-echo "Sent /.snapshots/full-$(date +%Y%m%d) to /run/media/rk/256/snapshots/full-$(date +%Y%m%d)"
+sudo btrfs send -p $local_snapshots_dir/$previous_backup $local_snapshots_dir/$new_backup | sudo btrfs receive $remote_snapshots_dir
 
-# Remove the oldest backups
-sudo btrfs subvolume remove /.snapshots/$oldest_backup
-sudo btrfs subvolume remove /run/media/rk/256/snapshots/$oldest_backup
-echo "Removed the oldest backups: /.snapshots/$oldest_backup and /run/media/rk/256/snapshots/$oldest_backup"
+# Inform about the results
+echo "Local snapshots:"
+echo $(ls $local_snapshots_dir)
+echo "Remote snapshots:"
+echo $(ls $remote_snapshots_dir)
