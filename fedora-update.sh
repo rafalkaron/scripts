@@ -1,2 +1,3 @@
-sudo dnf upgrade
 flatpak update
+sudo dnf upgrade
+sudo tracer
