@@ -1,23 +1,31 @@
 #!/usr/bin/bash
 
-# TODOS:
-# * Add a check that ensures that there's an older subvolume for progressive backup
-# * Add if that checks how many snapshots there are. If there are less than 3 snapshots, do not delete the oldest one
-
 # DIRS
 local_snapshots_dir="/.snapshots"
 remote_snapshots_dir="/run/media/rk/256/snapshots"
-
 # FILENAMES
 new_backup="full-$(date +%Y%m%d)"
 previous_backup=$(ls $local_snapshots_dir | tail -1)
 oldest_backup=$(ls $local_snapshots_dir -r | tail -1)
+# NUMBER
+# NOTE: Root folder is also counted
+local_snapshots_number=$(find $local_snapshots_dir -maxdepth 1 -type d | wc -l)
+remote_snapshots_number=$(find $remote_snapshots_dir -maxdepth 1 -type d | wc -l)
 
-# Create a snapshot
-sudo btrfs subvolume snapshot -r / $local_snapshots_dir/$new_backup
+# Create a snapshot, try to send the snapshot progressively, fallback to non-progressive send
+sudo btrfs subvolume snapshot -r / $local_snapshots_dir/$new_backup && sudo btrfs send -p $local_snapshots_dir/$previous_backup $local_snapshots_dir/$new_backup | sudo btrfs receive $remote_snapshots_dir || sudo btrfs send $local_snapshots_dir/$new_backup | sudo btrfs receive $remote_snapshots_dir
 
-# Send the new snapshot progressively
-sudo btrfs send -p $local_snapshots_dir/$previous_backup $local_snapshots_dir/$new_backup | sudo btrfs receive $remote_snapshots_dir
+# Delete local snapshots if their number exceeeds 3
+if (($local_snapshots_number > 3));
+then
+  sudo btrfs subvolume delete $local_snapshots_dir/$oldest_backup
+fi
+
+# Delete remote snapshots if their number exceeds 3
+if (($remote_snapshots_number > 3));
+then
+  sudo btrfs subvolume delete $remote_snapshots_dir/$oldest_backup
+fi
 
 # Inform about the results
 echo "Local snapshots:"
