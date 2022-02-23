@@ -3,6 +3,17 @@
 # DIRS
 local_snapshots_dir="/.snapshots"
 remote_snapshots_dir="/run/media/rk/256/snapshots"
+
+# Check if snapshots dirs exists
+if [ ! -d "$remote_snapshots_dir" ]; then
+  echo "[!] The remote backup directory ($remote_snapshots_dir) does not exist. Exiting..."
+  exit 0
+fi
+if [ ! -d "$local_snapshots_dir" ]; then
+  echo "[!] The local backup directory ($local_backup_dir) does not exist. Exiting..."
+  exit 0
+fi
+
 # FILENAMES
 new_backup="full-$(date +%Y%m%d)"
 previous_backup=$(ls $local_snapshots_dir | tail -1)
@@ -16,7 +27,7 @@ remote_snapshots_number=$(find $remote_snapshots_dir -maxdepth 1 -type d | wc -l
 
 if [[ "$new_backup" != "$previous_backup" ]];
 then
-  echo "Creating and sending a full system snapshot"
+  echo "[info] Creating and sending a full system snapshot"
   sudo btrfs subvolume snapshot -r / $local_snapshots_dir/$new_backup && sudo btrfs send -p $local_snapshots_dir/$previous_backup $local_snapshots_dir/$new_backup | sudo btrfs receive $remote_snapshots_dir || sudo btrfs send $local_snapshots_dir/$new_backup | sudo btrfs receive $remote_snapshots_dir
 
   # Delete local snapshots if their number exceeeds 3
@@ -32,15 +43,15 @@ then
   fi
 
   # Deja-dup
-  echo "Running an incremental deja-dup backup of ~/"
+  echo "[info] Running an incremental deja-dup backup of ~/"
   deja-dup --backup
 
 else
-  echo "A full system snapshot has alreadby been created today"
+  echo "[!] A full system snapshot and deja-dup back-up have already been created today. Exiting..."
 fi
 
 # Inform about the results
-echo "Local snapshots:"
+echo "[info] Local snapshots:"
 echo $(ls $local_snapshots_dir)
-echo "Remote snapshots:"
+echo "[info] Remote snapshots:"
 echo $(ls $remote_snapshots_dir)
