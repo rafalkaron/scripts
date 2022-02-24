@@ -42,16 +42,16 @@ then
     sudo btrfs subvolume delete $remote_snapshots_dir/$oldest_backup
   fi
 
+  # Inform about the results
+  echo "[info] Local snapshots:"
+  echo $(ls $local_snapshots_dir)
+  echo "[info] Remote snapshots:"
+  echo $(ls $remote_snapshots_dir)
+
   # Deja-dup
   echo "[info] Running an incremental deja-dup backup of ~/"
   deja-dup --backup
 
 else
-  echo "[!] A full system snapshot and deja-dup back-up have already been created today. Exiting..."
+  echo "[!] A full system snapshot and a deja-dup (duplicity) backup have already been created today. Exiting..."
 fi
-
-# Inform about the results
-echo "[info] Local snapshots:"
-echo $(ls $local_snapshots_dir)
-echo "[info] Remote snapshots:"
-echo $(ls $remote_snapshots_dir)
