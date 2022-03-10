@@ -5,6 +5,9 @@ echo "Updating dfn packages..."
 sudo dnf upgrade
 sudo dnf offline-upgrade download
 
+echo "Updating homebrew packages..."
+brew update
+
 echo "Checking if a reboot/relog is needed..."
 sudo tracer
 
