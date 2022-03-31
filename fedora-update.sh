@@ -7,6 +7,7 @@ sudo dnf offline-upgrade download
 
 echo "Updating homebrew packages..."
 brew update
+brew upgrade
 
 echo "Checking if a reboot/relog is needed..."
 sudo tracer
