@@ -2,7 +2,7 @@ echo "Updating flatpak packages..."
 flatpak update --user
 
 echo "Updating dfn packages..."
-sudo dnf upgrade
+sudo dnf upgrade --refresh
 sudo dnf offline-upgrade download
 
 echo "Updating homebrew packages..."
