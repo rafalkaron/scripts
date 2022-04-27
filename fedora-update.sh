@@ -1,8 +1,8 @@
 echo "Updating flatpak packages..."
-flatpak update --user
+flatpak update --user -y
 
 echo "Updating dfn packages..."
-sudo dnf upgrade --refresh
+sudo dnf upgrade --refresh -y
 echo "Updating 'offline' dnf packages..."
 sudo dnf offline-upgrade download
 
