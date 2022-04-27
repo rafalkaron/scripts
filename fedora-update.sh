@@ -1,19 +1,19 @@
-echo "Updating flatpak packages..."
-flatpak update --user -y
-
-echo "Updating dfn packages..."
+echo "[i] Updating dfn packages..."
 sudo dnf upgrade --refresh -y
-echo "Updating 'offline' dnf packages..."
+echo "[i] Updating dnf packages that require a reboot..."
 sudo dnf offline-upgrade download
 
-echo "Updating homebrew packages..."
+echo "[i] Updating flatpak packages..."
+flatpak update --user -y
+
+echo "[i] Updating homebrew packages..."
 brew update
 brew upgrade
 
 #echo "Checking if a reboot/relog is needed..."
 #sudo tracer
 
-read -p "If needed, reboot to install the offline updates now? [y/n] " -n 1 -r
+read -p "[?] If needed, reboot to install the offline updates now? [y/n] " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
