@@ -4,7 +4,7 @@ echo "[i] Updating dnf packages that require a reboot..."
 sudo dnf offline-upgrade download
 
 echo "[i] Updating flatpak packages..."
-flatpak update -y
+sudo flatpak update -y
 
 echo "[i] Updating homebrew packages..."
 brew update
